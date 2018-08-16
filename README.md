@@ -59,7 +59,7 @@ You can, however, create more top-level directories.<br>
 They will not be included in the production build so you can use them for things like documentation.
 
 ## Available Scripts
-##Server Side Scripts
+## Server Side Scripts
 In the Root directory, you can run:
 
 ### `npm start`
@@ -76,7 +76,7 @@ Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
 
 The page will reload if you make edits.<br>
 
-##Client Side Scripts
+## Client Side Scripts
 In the client directory, you cann run: 
 
 ### `npm start`
