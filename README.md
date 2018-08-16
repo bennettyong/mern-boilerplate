@@ -1,6 +1,6 @@
-generator MERN - a boilerplate thats uses the MERN stack for easy creation of web applications
+## generator MERN - a boilerplate thats uses the MERN stack for easy creation of web applications
 
-Below you will find some information on how to perform common tasks.<br>
+Below you will find some information on this generator.<br>
 
 ## Table of Contents
 
