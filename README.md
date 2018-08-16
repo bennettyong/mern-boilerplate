@@ -6,10 +6,8 @@ Below you will find some information on how to perform common tasks.<br>
 
 - [Folder Structure](#folder-structure)
 - [Available Scripts](#available-scripts)
-  - [npm start](#npm-start)
-  - [npm test](#npm-test)
-  - [npm run build](#npm-run-build)
-  - [npm run eject](#npm-run-eject)
+  - [Server Side Scripts](#server-side-scripts)
+  - [Client Side Scripts](#client-side-scripts)
 - [Using blueprintjs](#using-blueprintjs)
 - [Fetching Data with AJAX Requests](#fetching-data-with-ajax-requests)
 - [Integrating with an Express Backend](#integrating-with-an-express-backend)
@@ -61,7 +59,7 @@ You can, however, create more top-level directories.<br>
 They will not be included in the production build so you can use them for things like documentation.
 
 ## Available Scripts
-
+##Server Side Scripts
 In the Root directory, you can run:
 
 ### `npm start`
@@ -78,7 +76,8 @@ Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
 
 The page will reload if you make edits.<br>
 
-In the cliennt directory, you cann run: 
+##Client Side Scripts
+In the client directory, you cann run: 
 
 ### `npm start`
 
