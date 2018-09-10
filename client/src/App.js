@@ -10,18 +10,85 @@ import Header from './components/Header'
 import Main from './components/Main'
 import Login from './components/Login'
 import Register from './components/Register'
+import {AuthProvider, AuthConsumer} from "react-check-auth";
 import './App.css';
 
+function LoggedIn(){
+    tokenStillValid();
+    if(!sessionStorage.getItem('jwtToken')) {
+      return false
+    }else{
+      return true
+    }
+}
+
+function tokenStillValid(){
+    let token = sessionStorage.getItem('jwtToken');
+    /* if(!token || token === "") {
+      //if there is no token, dont bother
+      return false;
+    } */
+    var data = {
+      token : token
+    }
+    fetch("/api/user", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json, text/plain,*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(data)
+        sessionStorage.setItem('jwtToken', data.token);
+    })
+    .catch(err => {
+      console.log(err)
+      return err
+    })
+  }
+
+
 class App extends Component {
+  
+  
+
   render() {
     return (
       <div className="App">
         <Header />
         <Router history={history}>
           <div>
-            <Route exact path="/" component={Main}/>
-            <Route exact path="/login" component={Login}/>
-            <Route exact path="/register" component={Register}/>
+            <Route exact path="/" render={function(){
+              if(LoggedIn()){
+                return <Main/>
+              }
+                else{
+                  return <Redirect to="/login"/>
+                }
+              }
+              }/>
+            {/* <Route exact path="/" component={Main}/> */}
+            <Route exact path="/login" render={function(){
+              if(LoggedIn()){
+                return <Redirect to="/"/>
+              }
+                else{
+                  return <Login/>
+                }
+              }
+              }/>
+            <Route exact path="/register" render={function(){
+              if(LoggedIn()){
+                return <Redirect to="/"/>
+              }
+                else{
+                  return <Register/>
+                }
+              }
+              }/>
           </div>
         </Router>
       </div>

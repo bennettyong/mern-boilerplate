@@ -1,14 +1,33 @@
 var User = require('../models/user');
 var async = require('async');
+var session = require('express-session');
+var jwt = require('jsonwebtoken')
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
+
+/* var autHeader = {
+        "token-id": 0,
+        "device-type": "AML9327483"
+    }; */
+function generateToken(user) {
+  //1. Dont use password and other sensitive fields
+  //2. Use fields that are useful in other parts of the     
+  //app/collections/models
+  var u = {
+   email: user.email,
+   username: user.username,
+   _id: user._id.toString(),
+  };
+  return token = jwt.sign(u, "cert"/* , { algorithm: 'RS256'}, {
+     expiresIn: 60 * 60 * 24 // expires in 24 hours
+  } */);
+}
 
 exports.index = function(req, res) {
     res.send('NOT IMPLEMENTED: Site Home Page');
 };
 
 exports.user_login = function(req, res){
-
     var email = req.body.email
     var password =  req.body.password
 
@@ -19,9 +38,31 @@ exports.user_login = function(req, res){
             if(user){
                 user.comparePasswords(req.body.password, function(err, result){
                     if (err) return err;
-                        res.json({
-                            result: result
-                        })
+                        if(result){
+                            req.session.session_user_id=user._id;
+                            req.session.session_username=user.username;
+                            req.session.session_email=user.email;
+
+                            req.session.save()
+                            var token = generateToken(user)
+                            console.log("set sesstion session_user_id " + req.session.session_user_id);
+                            console.log("set sesstion session_org_id" + req.session.session_username);
+                            console.log("set sesstion get_client_pin" + req.session.session_email);
+                            console.log("logged in")
+                            res.json({
+                                result: result,
+                                user: user,
+                                token: token
+                            })
+                        }
+                        else{
+                            console.log("Incorrect Password")
+                            res.json({
+                                result: result,
+                                user: {}
+                            })
+                        }
+                        
                     })}
             else{
                 res.status(404).send('Invalid Login Information')
@@ -119,9 +160,20 @@ exports.user_create_post = [
                 user.save(function (err,user) {
                 if (err) { return next(err); }
                 // Successful - redirect to new author record.
-                return res.json({
-                    result: 'success',
-                    user : user
+                req.session.session_user_id=user._id;
+                req.session.session_username=user.username;
+                req.session.session_email=user.email;
+
+                req.session.save()
+                var token = generateToken(user)
+                console.log("set sesstion session_user_id " + req.session.session_user_id);
+                console.log("set sesstion session_org_id" + req.session.session_username);
+                console.log("set sesstion get_client_pin" + req.session.session_email);
+                console.log("logged in")
+                res.json({
+                    result: "success",
+                    user: user,
+                    token: token
                 })
             })
             }
@@ -132,6 +184,70 @@ exports.user_create_post = [
             
         }}
 ]
+
+exports.user = function(req, res) {
+    // check header or url parameters or post parameters for token
+    var sess = req.session.session_user_id
+    console.log("sess");
+    if (sess == undefined){
+        res.status(401).json({message: 'Not Logged In'});
+    }else{
+        User.findById({
+            '_id': sess
+        }, function(err, user) {
+            if (err) throw err;
+            var real_token = generateToken(user)
+            var token = req.body.token;
+            if (!token) {
+                res.json({
+                    result:"Must pass Token",
+                    user: user,
+                    token: real_token
+                });
+                //return res.status(401).json({message: 'Must pass token'});
+            }else if(real_token != token){
+                res.json({
+                    result:"Token Modified",
+                    user: user,
+                    token: real_token
+                });
+                //return res.status(401).json({message: 'Token Modified'});
+            }else{
+                res.json({
+                    result:"success",
+                    user: user,
+                    token: real_token
+                });
+            }
+         });
+    }
+    
+    
+    // Check token that was passed by decoding token using secret
+    /* jwt.verify(token, "cert", function(err, user) {
+    if (err){
+        return res.status(404).json({message: 'Token was changed'});
+        throw err;
+    } 
+    //return user using the id from w/in JWTToken
+    User.findById({
+        '_id': user._id
+    }, function(err, user) {
+       if (err) throw err;
+        res.json({
+            user: user,
+            token: token
+        });
+     });
+    }); */
+};
+
+exports.user_logout = function(req, res) {
+    req.session.destroy(function(err) {
+        console.log("logged out")
+    })
+};
+
 // Display user delete form on GET.
 exports.user_delete_get = function(req, res) {
     res.send('NOT IMPLEMENTED: user delete GET');

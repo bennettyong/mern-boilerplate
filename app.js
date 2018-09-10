@@ -3,13 +3,13 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 //Import the mongoose module
 var mongoose = require('mongoose');
 var indexRouter = require('./routes/index');
 var apiRouter = require('./routes/api');
-
 var app = express();
-
 var User = require('./models/user')
 //Set up default mongoose connection
 var mongoDB = 'mongodb://127.0.0.1/new_mern_database';
@@ -60,11 +60,21 @@ db.once('open', function() {
 			console.log(books);
 	}) */
 });
+app.set('trust proxy', 1)
+app.use(
+	session({
+		secret: 'mern', 
+		resave: false,
+		store: new MongoStore(
+    		{mongooseConnection:mongoose.connection}
+    	)       
+	
+		}));
 //morgan middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('mern'));
 app.use(function(req, res, next) 
 {
   console.log(req.url);
@@ -74,7 +84,43 @@ app.use(function(req, res, next)
   next();
 
 });
+
 app.use(express.static(path.join(__dirname, 'client/build')));
+
+app.all('*', checkSession);
+function checkSession(req, res, next) 
+{
+  console.log("checkSession req.session.user_id: "+req.session.session_user_id);
+  
+    if(req.session.session_user_id!=null || req.url=="/api/login" || req.url=="/api/user/create" /* || req.url=="/api/forget_password" || req.url=="/api/check_reset_pass_para" || req.url=="/api/re_update_password" */)
+    {
+
+      console.log("without login");
+    if(req.url=="/api/logout")
+    {
+     	console.log("logout call");
+     	req.session.destroy(function(err) {
+        	console.log(err)
+        	res.json({
+        		result:true
+        	})
+    	})
+    }
+    else
+    {
+    	console.log(res.body)
+		console.log("return response");
+		next();
+    }
+
+    }
+    else
+    {
+    	console.log(res.body)
+    	res.status(403).send('Something broke!')
+    }
+
+}
 //express static middleware
 /* app.use(express.static(path.join(__dirname, 'public'))); */
 
@@ -94,7 +140,7 @@ app.use(function(err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.send('error');
 });
 
 module.exports = app;

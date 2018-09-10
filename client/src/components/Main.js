@@ -11,13 +11,17 @@ class Main extends Component {
 }
 
   componentDidMount() {
-    fetch('/api/users')
+    fetch('/api/users',{
+      method:"GET",
+    })
       .then(res => res.json())
       .then(users => this.setState({ 
         user : users["user_list"] 
       }))
       .catch(
-        err => console.log(err)
+        err => {
+          console.log(err)
+        }
       )
   }
 

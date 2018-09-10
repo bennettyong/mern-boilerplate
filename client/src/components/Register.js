@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { FormGroup, H5, InputGroup, Intent, Switch, Button } from "@blueprintjs/core";
 import { AppToast } from "./AppToast";
+import history from '../history';
 
 class Register extends Component {
   
@@ -40,9 +41,13 @@ class Register extends Component {
     .then(res => res.json())
     .then(data => {
       if(data.result === "success"){
+        console.log(data)
+        sessionStorage.setItem('jwtToken', data.token);
+        console.log("JWT stored")
         AppToast.show({ message: "Success",
                         intent: Intent.SUCCESS,
                         icon : "thumbs-up"});
+        history.push('/');
       }else{
         console.log(data)
         for (var i in data) {

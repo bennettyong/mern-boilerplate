@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { FormGroup, H5, InputGroup, Intent, Switch, Button } from "@blueprintjs/core";
 import { AppToast } from "./AppToast";
-
+import history from '../history';
 
 class Login extends Component {
   
@@ -25,8 +25,6 @@ class Login extends Component {
     var user = {...this.state.user}
     user[name] = value;
     this.setState({user})
-
-    console.log(this.state)
   }
 
   handleSubmit(event) {
@@ -37,6 +35,7 @@ class Login extends Component {
     fetch('/api/login',
       {
       method: 'POST',
+
       headers: {
         'Accept': 'application/json, text/plain,*',
         'Content-Type': 'application/json'
@@ -46,12 +45,16 @@ class Login extends Component {
     .then(res => res.json())
     .then(data => {
         if(data.result){
+          /* console.log(data) */
+          sessionStorage.setItem('jwtToken', data.token);
+          console.log("JWT stored")
           this.setState({
             outcome:true
           })
           AppToast.show({ message: "Success" ,
                               intent: Intent.SUCCESS,
                               icon : "tick"});
+          history.push('/');
         }else{
           AppToast.show({ message: "Wrong password" ,
                                 intent: Intent.DANGER,

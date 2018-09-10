@@ -26,8 +26,11 @@ router.post('/user/:id/update', user_controller.user_update_post);
 // GET request for one user.
 router.get('/user/:id', user_controller.user_detail);
 
+router.post('/user', user_controller.user);
 // GET request for list of all users.
 router.get('/users', user_controller.user_list);
+
+/* router.post('/logout', user_controller.user_logout); */
 
 router.post('/login', user_controller.user_login);
 
