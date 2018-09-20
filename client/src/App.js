@@ -42,7 +42,9 @@ function tokenStillValid(){
     .then(res => res.json())
     .then(data => {
         console.log(data)
-        sessionStorage.setItem('jwtToken', data.token);
+        if(data.success){
+          sessionStorage.setItem('jwtToken', data.result.token);
+        }
     })
     .catch(err => {
       console.log(err)
@@ -52,13 +54,14 @@ function tokenStillValid(){
 
 
 class App extends Component {
-  
-  
+  constructor(props){
+    super(props)
 
+  }
   render() {
     return (
       <div className="App">
-        <Header />
+        <Header LoggedIn = {LoggedIn()}/>
         <Router history={history}>
           <div>
             <Route exact path="/" render={function(){

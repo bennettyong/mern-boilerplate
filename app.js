@@ -3,8 +3,11 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var log = require('./utils/logger');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
+var util = require('./utils/response');
+var message = require('./utils/messages.json');
 //Import the mongoose module
 var mongoose = require('mongoose');
 var indexRouter = require('./routes/index');
@@ -69,57 +72,47 @@ app.use(
     		{mongooseConnection:mongoose.connection}
     	)       
 	
-		}));
+	})
+);
 //morgan middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser('mern'));
-app.use(function(req, res, next) 
-{
+app.use(function(req, res, next) {
   console.log(req.url);
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
   next();
-
 });
 
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 app.all('*', checkSession);
-function checkSession(req, res, next) 
-{
+function checkSession(req, res, next) {
   console.log("checkSession req.session.user_id: "+req.session.session_user_id);
-  
-    if(req.session.session_user_id!=null || req.url=="/api/login" || req.url=="/api/user/create" /* || req.url=="/api/forget_password" || req.url=="/api/check_reset_pass_para" || req.url=="/api/re_update_password" */)
-    {
 
-      console.log("without login");
-    if(req.url=="/api/logout")
-    {
-     	console.log("logout call");
-     	req.session.destroy(function(err) {
-        	console.log(err)
-        	res.json({
-        		result:true
-        	})
-    	})
+    if(req.session.session_user_id!=null || req.url=="/api/login" || req.url=="/api/user/create" /* || req.url=="/api/forget_password" || req.url=="/api/check_reset_pass_para" || req.url=="/api/re_update_password" */){
+    	console.log("without login");
+	    if(req.url=="/api/logout"){
+	     	console.log("logout call");
+	     	req.session.destroy(function(err) {
+	        	if(err)next()
+	        	res.send(util.success({}, message.logout));
+	    	})
+	    }else{
+			console.log(res.body)
+			console.log("return response");
+			next();
+	    }
     }
     else
     {
     	console.log(res.body)
-		console.log("return response");
-		next();
+    	res.send(util.error({}, message.common_messages_error));
+    	/* res.status(403).send('Something broke!') */
     }
-
-    }
-    else
-    {
-    	console.log(res.body)
-    	res.status(403).send('Something broke!')
-    }
-
 }
 //express static middleware
 /* app.use(express.static(path.join(__dirname, 'public'))); */
@@ -127,12 +120,10 @@ function checkSession(req, res, next)
 app.use('/', indexRouter);
 
 app.use('/api', apiRouter);
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404,'Second'));
 });
-
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
@@ -140,7 +131,7 @@ app.use(function(err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   // render the error page
   res.status(err.status || 500);
-  res.send('error');
+  res.send(util.error({}, message.common_messages_error));
 });
 
 module.exports = app;

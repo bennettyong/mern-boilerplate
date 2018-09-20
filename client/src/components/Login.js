@@ -44,7 +44,7 @@ class Login extends Component {
     })
     .then(res => res.json())
     .then(data => {
-        if(data.result){
+        if(data.success){
           /* console.log(data) */
           sessionStorage.setItem('jwtToken', data.token);
           console.log("JWT stored")
@@ -56,7 +56,9 @@ class Login extends Component {
                               icon : "tick"});
           history.push('/');
         }else{
-          AppToast.show({ message: "Wrong password" ,
+          console.log(data)
+          var msg = data.result[0].msg
+          AppToast.show({ message: msg ,
                                 intent: Intent.DANGER,
                                 icon : "ban-circle"});
         }

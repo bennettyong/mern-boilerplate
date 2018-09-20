@@ -40,7 +40,7 @@ class Register extends Component {
     })
     .then(res => res.json())
     .then(data => {
-      if(data.result === "success"){
+      if(data.success){
         console.log(data)
         sessionStorage.setItem('jwtToken', data.token);
         console.log("JWT stored")
@@ -50,8 +50,9 @@ class Register extends Component {
         history.push('/');
       }else{
         console.log(data)
-        for (var i in data) {
-          AppToast.show({ message: data[i].msg,
+        var errors = data.result
+        for (var i in errors) {
+          AppToast.show({ message: errors[i].msg,
                         intent: Intent.DANGER,
                         icon : "ban-circle"});
         } 

@@ -15,9 +15,12 @@ class Main extends Component {
       method:"GET",
     })
       .then(res => res.json())
-      .then(users => this.setState({ 
-        user : users["user_list"] 
-      }))
+      .then(users => {
+        var list = users.result.user_list
+        this.setState({ 
+          user : list
+        })
+      })
       .catch(
         err => {
           console.log(err)
@@ -30,7 +33,6 @@ class Main extends Component {
     const users = this.state.user
 
     function userEmail (rowIndex: number) {
-      console.log(rowIndex)
       return (
         <Cell>
           {users[rowIndex].email}
@@ -39,7 +41,6 @@ class Main extends Component {
     }
 
     function userName (rowIndex: number) {
-      console.log(rowIndex)
       return (
         <Cell>
           {users[rowIndex].username}
@@ -52,9 +53,7 @@ class Main extends Component {
         <h4>Users</h4>
         <Table numRows={this.state.user.length}>
           <Column name="Email" cellRenderer={userEmail}/>
-          
-          <Column name="Username" cellRenderer={userName}/>
-            
+          <Column name="Username" cellRenderer={userName}/>   
         </Table>
       </div>
     );

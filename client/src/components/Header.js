@@ -17,7 +17,17 @@ import { IconNames } from "@blueprintjs/icons";
 export default class Header extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      LoggedIn: false
+    }
     this.handleClick = this.handleClick.bind(this);
+  }
+
+  componentDidMount(){
+      this.setState({
+        LoggedIn : this.props.LoggedIn
+      })
+      console.log(this.state);
   }
 
   handleClick(e){
@@ -38,7 +48,7 @@ export default class Header extends React.Component {
       AppToast.show({ message: "Logged Out" ,
                               intent: Intent.SUCCESS,
                               icon : "log-out"});
-      history.push('/');
+      history.push('/login');
     })
     .catch(err => {
       console.log("Already Logged out")
